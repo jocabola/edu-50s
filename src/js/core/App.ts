@@ -6,6 +6,7 @@ import { Layer03 } from "../gfx/layers/Layer03";
 import { Layer04 } from "../gfx/layers/Layer04";
 import { Layer05 } from "../gfx/layers/Layer05";
 import { Layer06 } from "../gfx/layers/Layer06";
+import { Layer07 } from "../gfx/layers/Layer07";
 import { Timer } from "@fils/ani";
 
 export class App {
@@ -27,9 +28,10 @@ export class App {
 			new Layer04(this.gl),
 			new Layer05(this.gl),
 			new Layer06(this.gl),
+			new Layer07(this.gl),
 		];
 
-		this.activeIndex = 5;
+		this.activeIndex = 6;
 
 		window.addEventListener('keydown', (e) => {
 			const n = parseInt(e.key);
