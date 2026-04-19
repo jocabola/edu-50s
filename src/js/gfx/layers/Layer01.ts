@@ -1,26 +1,15 @@
 import { ThreeDOMLayer } from "@fils/gl-dom";
-import { OrthographicCamera, PlaneGeometry, Mesh, MeshBasicMaterial } from "three";
+import { PlaneGeometry, Mesh, MeshBasicMaterial } from "three";
 import { gsap } from "gsap";
-import { ThreeSketch } from "../ThreeSketch";
-import { BLACK, WHITE, RED } from "../palette";
+import { FlashLayer, W, H } from "../FlashLayer";
+import { WHITE } from "../palette";
 
-const W = 1920, H = 1080;
-const BPM = 60;
-const BASE_FREQ = BPM / 60;
-
-export class Layer01 extends ThreeSketch {
+export class Layer01 extends FlashLayer {
     hStripe: Mesh;
     vStripe: Mesh;
-    ortho: OrthographicCamera;
-
-    private phase = 0;
-    private prevTime = 0;
-    private lastBeat = -1;
 
     constructor(_gl: ThreeDOMLayer) {
         super(_gl);
-        this.ortho = new OrthographicCamera(-W/2, W/2, H/2, -H/2, -1, 1);
-        this.params.camera = this.ortho;
 
         this.hStripe = new Mesh(
             new PlaneGeometry(W * 0.8, H * 0.35),
@@ -43,38 +32,21 @@ export class Layer01 extends ThreeSketch {
         gsap.to(mesh.scale, { [axis]: 0, duration, ease: "none" });
     }
 
-    update(time: number) {
-        const dt = time - this.prevTime;
-        this.prevTime = time;
-
-        const speed = BASE_FREQ;
-        this.phase += speed * dt;
-
-        const beat = Math.floor(this.phase);
-        // time remaining in this beat, shrunk to 90% to ensure completion
-        const beatRemaining = ((1 - (this.phase % 1)) / speed) * 0.9;
-
-        const isRed = beat % 13 === 0;
-        const bg = isRed ? RED : beat % 2 === 0 ? WHITE : BLACK;
-        this.gl.renderer.setClearColor(bg, 1);
-
+    protected onBeat(beat: number, beatRemaining: number) {
         const showStripe = beat % 5 === 0;
         const useVertical = beat % 11 === 0;
-        const fg = bg === BLACK ? WHITE : BLACK;
 
         this.hStripe.visible = showStripe && !useVertical;
         this.vStripe.visible = showStripe && useVertical;
 
-        if (showStripe && beat !== this.lastBeat) {
-            (this.hStripe.material as MeshBasicMaterial).color = fg;
-            (this.vStripe.material as MeshBasicMaterial).color = fg;
+        if (showStripe) {
+            (this.hStripe.material as MeshBasicMaterial).color = this.fg;
+            (this.vStripe.material as MeshBasicMaterial).color = this.fg;
             if (useVertical) {
                 this.flashStripe(this.vStripe, 'x', beatRemaining);
             } else {
                 this.flashStripe(this.hStripe, 'y', beatRemaining);
             }
         }
-
-        this.lastBeat = beat;
     }
 }

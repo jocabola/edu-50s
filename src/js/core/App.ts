@@ -2,6 +2,7 @@ import { ThreeDOMLayer } from "@fils/gl-dom";
 import { ThreeSketch } from "../gfx/ThreeSketch";
 import { Layer01 } from "../gfx/layers/Layer01";
 import { Layer02 } from "../gfx/layers/Layer02";
+import { Layer03 } from "../gfx/layers/Layer03";
 import { Timer } from "@fils/ani";
 
 export class App {
@@ -17,9 +18,10 @@ export class App {
 		this.layers = [
 			new Layer01(this.gl),
 			new Layer02(this.gl),
+			new Layer03(this.gl),
 		];
 
-		this.activeIndex = 1;
+		this.activeIndex = 2;
 
 		window.addEventListener('keydown', (e) => {
 			const n = parseInt(e.key);
