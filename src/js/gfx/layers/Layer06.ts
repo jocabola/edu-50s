@@ -10,7 +10,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createNoise3D } from "simplex-noise";
 import { ThreeSketch } from "../ThreeSketch";
 import { WHITE, BLACK, RED } from "../palette";
-import { W, H } from "../FlashLayer";
+import { W, H, tempo } from "../FlashLayer";
 
 const HW = W / 2, HH = H / 2;
 const TARGET_HEIGHT = 600;
@@ -18,14 +18,13 @@ const N_THREADS = 100;
 const N_SEGMENTS = 100;
 const SPRING_REST = 0.5;
 const THREAD_SCALE = 10;
-const GRAVITY_STRENGTH = 0.016; // per-frame magnitude (no built-in gravity)
-const GRAVITY_SPIN = 0.12;      // radians per second
+const GRAVITY_STRENGTH = 0.016;
+const GRAVITY_SPIN = 0.12;
 const NOISE_STRENGTH = 0.48;
-const NOISE_BOOST = 4.0;     // multiplier during red flash
+const NOISE_BOOST = 4.0;
 const NOISE_SCALE = 0.12;
 const NOISE_SPEED = 0.6;
-const SLOW_BPM = 18;
-const SLOW_FREQ = SLOW_BPM / 60;
+const SLOW_RATIO = 0.3;
 const FLASH_DURATION = 0.25;
 
 const BLACK_PALETTE: FilThreePalette = [
@@ -157,7 +156,7 @@ export class Layer06 extends ThreeSketch {
         this.prevTime = time;
 
         // Slow beat
-        this.slowPhase += SLOW_FREQ * dt;
+        this.slowPhase += (tempo.bpm * SLOW_RATIO / 60) * dt;
         const newSlowBeat = Math.floor(this.slowPhase);
         if (newSlowBeat !== this.slowBeat) {
             this.slowBeat = newSlowBeat;

@@ -7,7 +7,7 @@ import {
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { ThreeSketch } from "../ThreeSketch";
-import { W, H } from "../FlashLayer";
+import { W, H, tempo } from "../FlashLayer";
 import { RED, WHITE } from "../palette";
 
 const SW = 1920, SH = 1080;
@@ -15,8 +15,7 @@ const TARGET_HEIGHT = 600;
 const STEPS_PER_FRAME = 24;
 const FEED = 0.0545;
 const KILL = 0.0620;
-const SLOW_BPM = 8;
-const SLOW_FREQ = SLOW_BPM / 60;
+const SLOW_RATIO = 1 / 7.5;
 
 // ── Shaders ─────────────────────────────────────────────────────────────────
 
@@ -196,7 +195,7 @@ export class Layer07 extends ThreeSketch {
         const dt = Math.min(time - this.prevTime, 0.05);
         this.prevTime = time;
 
-        this.slowPhase += SLOW_FREQ * dt;
+        this.slowPhase += (tempo.bpm * SLOW_RATIO / 60) * dt;
         const newSlowBeat = Math.floor(this.slowPhase);
         if (newSlowBeat !== this.slowBeat) {
             this.slowBeat = newSlowBeat;

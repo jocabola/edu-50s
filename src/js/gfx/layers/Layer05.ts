@@ -3,9 +3,9 @@ import { gsap } from "gsap";
 import { MeshBasicMaterial } from "three";
 import { Layer04 } from "./Layer04";
 import { WHITE } from "../palette";
+import { MASTER_BPM, tempo } from "../FlashLayer";
 
-const SLOW_BPM = 20;
-const SLOW_FREQ = SLOW_BPM / 60;
+const SLOW_RATIO = 1 / 3;
 const FLASH_DURATION = 0.18;
 
 export class Layer05 extends Layer04 {
@@ -37,7 +37,7 @@ export class Layer05 extends Layer04 {
 
         super.update(time);
 
-        this.slowPhase += SLOW_FREQ * dt;
+        this.slowPhase += (tempo.bpm * SLOW_RATIO / 60) * dt;
         const newSlowBeat = Math.floor(this.slowPhase);
 
         if (newSlowBeat !== this.slowBeat) {

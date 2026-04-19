@@ -8,6 +8,7 @@ import { Layer05 } from "../gfx/layers/Layer05";
 import { Layer06 } from "../gfx/layers/Layer06";
 import { Layer07 } from "../gfx/layers/Layer07";
 import { Timer } from "@fils/ani";
+import { tempo, MASTER_BPM } from "../gfx/FlashLayer";
 
 export class App {
 	gl: ThreeDOMLayer;
@@ -38,6 +39,9 @@ export class App {
 			if (!isNaN(n) && n >= 1 && n <= this.layers.length) {
 				this.activeIndex = n - 1;
 			}
+			if (e.key === 'ArrowUp')   tempo.bpm = Math.min(300, tempo.bpm + 5);
+			if (e.key === 'ArrowDown') tempo.bpm = Math.max(10,  tempo.bpm - 5);
+			if (e.key === 'r')         tempo.bpm = MASTER_BPM;
 		});
 
 		this.start();
