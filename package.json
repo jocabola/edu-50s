@@ -1,0 +1,39 @@
+{
+  "name": "template",
+  "version": "0.1.0",
+  "description": "Web Sketch Template",
+  "main": "index.js",
+  "author": "Fil Studio <hello@fil.studio>",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "glsl": "node scripts/build/glsl",
+    "dev": "eleventy --serve --watch",
+    "build": "node scripts/build/build.js && ELEVENTY_ENV=production eleventy",
+    "prepack": "yarn build && node scripts/build/prepack.mjs",
+    "electron:dev": "yarn prepack && yarn --cwd ./app start",
+    "electron:package": "yarn prepack && yarn --cwd ./app package"
+  },
+  "dependencies": {
+    "@fils/ani": "^0.0.8",
+    "@fils/gfx": "^0.1.6",
+    "@fils/gl-dom": "^0.1.1",
+    "@fils/math": "^0.1.6",
+    "@fils/utils": "^0.1.6",
+    "gsap": "^3.15.0",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.5",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.2",
+    "autoprefixer": "^10.4.27",
+    "chokidar": "^5.0.0",
+    "clean-css": "^5.3.3",
+    "dotenv": "^17.4.1",
+    "esbuild": "^0.28.0",
+    "esbuild-plugin-alias": "^0.2.1",
+    "postcss": "^8.5.9",
+    "sass": "^1.99.0"
+  }
+}

@@ -1,0 +1,16 @@
+// Partials
+@use './partials/reset';
+@use './partials/variables';
+@use './partials/fonts';
+
+.view {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+}
+
+h1 {
+    font-size: 48px;
+}

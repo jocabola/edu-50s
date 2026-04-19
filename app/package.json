@@ -1,0 +1,21 @@
+{
+  "name": "elctron-app",
+  "version": "0.1.0",
+  "description": "App Name",
+  "main": "main.js",
+  "author": "Fil Studio <hello@fil.studio>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "electron-log": "^5.4.3"
+  },
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . --out=packaged --overwrite --ignore=packaged --ignore=out"
+  },
+  "devDependencies": {
+    "dotenv": "^17.3.1",
+    "electron": "^41.1.0",
+    "electron-packager": "^17.1.2"
+  }
+}
