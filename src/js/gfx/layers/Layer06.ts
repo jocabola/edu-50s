@@ -70,6 +70,8 @@ export class Layer06 extends ThreeSketch {
     private slowPhase = 0;
     private slowBeat = -1;
     private flashTimer = 0;
+    private wasFlashing = false;
+    private anchors: { x: number, y: number }[] = [];
     private labelMeshes: any[] = [];
 
     constructor(_gl: ThreeDOMLayer) {
@@ -114,7 +116,7 @@ export class Layer06 extends ThreeSketch {
                 allVerts = allVerts.concat(extractVertices(geo));
 
                 // "50" visual — black, hidden by default, shown on red flash
-                const label = new ThreeMesh(geo, new MeshBasicMaterial({ color: BLACK, side: DoubleSide }));
+                const label = new ThreeMesh(geo, new MeshBasicMaterial({ color: BLACK, side: DoubleSide, transparent: true, opacity: 0.2 }));
                 label.visible = false;
                 label.renderOrder = 1;
                 this.scene.add(label);
@@ -143,6 +145,7 @@ export class Layer06 extends ThreeSketch {
                 });
 
                 fil.particles[0].lock();
+                this.anchors.push({ x: phyX, y: phyY });
                 this.group.add(fil.fil);
                 this.fils.push(fil);
             }
@@ -164,6 +167,22 @@ export class Layer06 extends ThreeSketch {
         const flashing = this.flashTimer > 0;
         this.flashTimer = Math.max(0, this.flashTimer - dt);
 
+        // Flash start — unlock anchors
+        if (flashing && !this.wasFlashing) {
+            for (const fil of this.fils) fil.particles[0].unlock();
+        }
+
+        // Flash end — snap anchors back and re-lock
+        if (!flashing && this.wasFlashing) {
+            for (let i = 0; i < this.fils.length; i++) {
+                const p = this.fils[i].particles[0];
+                p.setPosition(this.anchors[i].x, this.anchors[i].y, 0);
+                p.lock();
+            }
+        }
+
+        this.wasFlashing = flashing;
+
         this.gl.renderer.setClearColor(flashing ? RED : WHITE, 1);
         for (const m of this.labelMeshes) m.visible = flashing;
 
@@ -175,7 +194,9 @@ export class Layer06 extends ThreeSketch {
 
         for (const fil of this.fils) {
             const particles = fil.particles;
-            for (let i = 1; i < particles.length; i++) {
+            // include particle[0] when unlocked so it also gets pushed around
+            const start = flashing ? 0 : 1;
+            for (let i = start; i < particles.length; i++) {
                 const p = particles[i];
                 const nx = p.position.x * NOISE_SCALE;
                 const ny = p.position.y * NOISE_SCALE;
