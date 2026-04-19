@@ -252,6 +252,11 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.28.0.tgz#04d90d5752b4ce65d2b6ac25eba08ff7624fe07c"
   integrity sha512-pEl1bO9mfAmIC+tW5btTmrKaujg3zGtUmWNdCw/xs70FBjwAL3o9OEKNHvNmnyylD6ubxUERiEhdsL0xBQ9efw==
 
+"@fil-studio/identity-blocks@^0.0.3":
+  version "0.0.3"
+  resolved "https://npm.pkg.github.com/download/@fil-studio/identity-blocks/0.0.3/ad4dc42f3556aedf22ecc97e67e1ab2c33a92559#ad4dc42f3556aedf22ecc97e67e1ab2c33a92559"
+  integrity sha512-Mmz8JRjglXk/QmmsSuXbx2ONNnOW3PKLmDI6SzudugAwi1qKR8JJXMP3e6tZ1dNoXRINK2Q1tGKrtiwBldQTMg==
+
 "@fils/ani@^0.0.8":
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/@fils/ani/-/ani-0.0.8.tgz#0c865a960faed2400b303b8c00611afc7867ff64"
@@ -267,12 +272,31 @@
   resolved "https://registry.yarnpkg.com/@fils/gl-dom/-/gl-dom-0.1.1.tgz#70e9edf026297e26607e969fa7a8c928397d3055"
   integrity sha512-L8B3KduRjZtP0mVcFqiEuejHdb9YYVbeCyhVHc2Dk1rX/bwohuaZK6a8eOaX669qrYhlobwBJrwIoKCelLRGzQ==
 
+"@fils/math@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@fils/math/-/math-0.0.8.tgz#6827b0f59ae61b54b6390a72d0e18e07b1471ce6"
+  integrity sha512-vNuppon7xCIvNqe+qIGypZ/qvj/LnwDE0Vdgtfq75hkwWDI8F4WKWDFjfMHlHgiiHfvhhwbS9A/Crjl2aIfihA==
+  dependencies:
+    mersenne "^0.0.4"
+
 "@fils/math@^0.1.6":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@fils/math/-/math-0.1.6.tgz#63a27d1ad38d43fa694704d8783034c53c26691b"
   integrity sha512-rJZz2uMOKr7ySINAsDhpWUdJB+WMH1C6ui0WmHBm4zSNHTZlXG6hXxFxIuChaztf1EkpV7LdlKGdz7WQa2kS+A==
   dependencies:
     seedrandom "^3.0.5"
+
+"@fils/phy-three@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@fils/phy-three/-/phy-three-0.0.6.tgz#b05f0a40914a5857fce17678e06186301b88a506"
+  integrity sha512-uq+tLMRPWVxUKLtLBQFfIIzlUm6h40pO5KHgQb4+3EgSqhred8EAuJwyC/qZAThZPkkDoWlJYFhLyT/pBCCTTQ==
+
+"@fils/phy@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@fils/phy/-/phy-0.0.7.tgz#17c5ebbdc94ae2fa23145d03ed70f78f9f8bd132"
+  integrity sha512-3szm9npSa8Jqc08TOWjaWjkZCJwtKvXZ1765s31h5vojyErIAHWVqkrNmQySA/8x4wT5e9npJnyKdy4qBUV7HQ==
+  dependencies:
+    "@fils/math" "^0.0.8"
 
 "@fils/utils@^0.1.6":
   version "0.1.6"
@@ -980,6 +1004,11 @@ mdurl@^2.0.0:
   resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-2.0.0.tgz#80676ec0433025dd3e17ee983d0fe8de5a2237e0"
   integrity sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==
 
+mersenne@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/mersenne/-/mersenne-0.0.4.tgz#401fdec7ec21cdb9e03cd3d3021398da21b27085"
+  integrity sha512-XoSUL+nF8hMTKGQxUs8r3Btdsf1yuKKBdCCGbh3YXgCXuVKishpZv1CNc385w9s8t4Ynwc5h61BwW/FCVulkbg==
+
 mime-db@^1.54.0:
   version "1.54.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.54.0.tgz#cddb3ee4f9c64530dff640236661d42cb6a314f5"
@@ -1261,6 +1290,11 @@ setprototypeof@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.2.0.tgz#66c9a24a73f9fc28cbe66b09fed3d33dcaf1b424"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
+
+simplex-noise@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/simplex-noise/-/simplex-noise-4.0.3.tgz#e60b840ecfb9ac972870c8c7979bd867a5b4032f"
+  integrity sha512-qSE2I4AngLQG7BXqoZj51jokT4WUXe8mOBrvfOXpci8+6Yu44+/dD5zqDpOx3Ux792eamTd2lLcI8jqFntk/lg==
 
 slash@^3.0.0:
   version "3.0.0"

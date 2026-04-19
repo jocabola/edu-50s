@@ -3,6 +3,9 @@ import { ThreeSketch } from "../gfx/ThreeSketch";
 import { Layer01 } from "../gfx/layers/Layer01";
 import { Layer02 } from "../gfx/layers/Layer02";
 import { Layer03 } from "../gfx/layers/Layer03";
+import { Layer04 } from "../gfx/layers/Layer04";
+import { Layer05 } from "../gfx/layers/Layer05";
+import { Layer06 } from "../gfx/layers/Layer06";
 import { Timer } from "@fils/ani";
 
 export class App {
@@ -12,16 +15,21 @@ export class App {
 	clock: Timer = new Timer(false);
 
 	constructor() {
-		this.gl = new ThreeDOMLayer(document.querySelector('.view') as HTMLElement);
+		this.gl = new ThreeDOMLayer(document.querySelector('.view') as HTMLElement, {
+			antialias: true
+		});
 		this.gl.renderer.setClearColor(0x000000, 1);
 
 		this.layers = [
 			new Layer01(this.gl),
 			new Layer02(this.gl),
 			new Layer03(this.gl),
+			new Layer04(this.gl),
+			new Layer05(this.gl),
+			new Layer06(this.gl),
 		];
 
-		this.activeIndex = 2;
+		this.activeIndex = 5;
 
 		window.addEventListener('keydown', (e) => {
 			const n = parseInt(e.key);

@@ -16,13 +16,17 @@
     "electron:package": "yarn prepack && yarn --cwd ./app package"
   },
   "dependencies": {
+    "@fil-studio/identity-blocks": "^0.0.3",
     "@fils/ani": "^0.0.8",
     "@fils/gfx": "^0.1.6",
     "@fils/gl-dom": "^0.1.1",
     "@fils/math": "^0.1.6",
+    "@fils/phy": "^0.0.7",
+    "@fils/phy-three": "^0.0.6",
     "@fils/utils": "^0.1.6",
     "gsap": "^3.15.0",
     "p2-es": "^1.2.3",
+    "simplex-noise": "^4.0.3",
     "three": "^0.183.2",
     "troika-three-text": "^0.52.4"
   },
