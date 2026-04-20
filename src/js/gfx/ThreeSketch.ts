@@ -18,7 +18,7 @@ export class ThreeSketch extends ThreeLayer {
         this.camera.updateProjectionMatrix();
     }
 
-    update(time:number) {
-        
-    }
+    update(time:number) {}
+    activate() {}
+    deactivate() {}
 }

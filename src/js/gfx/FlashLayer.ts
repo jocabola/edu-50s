@@ -30,7 +30,12 @@ export abstract class FlashLayer extends ThreeSketch {
 
     protected abstract onBeat(beat: number, beatRemaining: number): void;
 
+    deactivate() {
+        this.prevTime = -1;
+    }
+
     update(time: number) {
+        if (this.prevTime < 0) this.prevTime = time;
         const dt = time - this.prevTime;
         this.prevTime = time;
 

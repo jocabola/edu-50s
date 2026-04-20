@@ -13,8 +13,18 @@ import { tempo, MASTER_BPM } from "../gfx/FlashLayer";
 export class App {
 	gl: ThreeDOMLayer;
 	layers: ThreeSketch[] = [];
-	activeIndex: number = 0;
+	private _activeIndex: number = 0;
 	clock: Timer = new Timer(false);
+
+	get activeIndex() { return this._activeIndex; }
+	set activeIndex(n: number) {
+		if (this._activeIndex === n && this.layers[n].active) return;
+		this.activeLayer.active = false;
+		this.activeLayer.deactivate();
+		this._activeIndex = n;
+		this.activeLayer.active = true;
+		this.activeLayer.activate();
+	}
 
 	constructor() {
 		this.gl = new ThreeDOMLayer(document.querySelector('.view') as HTMLElement, {
@@ -32,6 +42,7 @@ export class App {
 			new Layer07(this.gl),
 		];
 
+		for (const layer of this.layers) layer.active = false;
 		this.activeIndex = 6;
 
 		window.addEventListener('keydown', (e) => {

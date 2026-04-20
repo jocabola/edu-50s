@@ -14,10 +14,10 @@ import { W, H, tempo } from "../FlashLayer";
 
 const HW = W / 2, HH = H / 2;
 const TARGET_HEIGHT = 600;
-const N_THREADS = 100;
-const N_SEGMENTS = 100;
-const SPRING_REST = 0.5;
-const THREAD_SCALE = 10;
+const N_THREADS = 1000;
+const N_SEGMENTS = 50;
+const SPRING_REST = 0.25;
+const THREAD_SCALE = 7;
 const GRAVITY_STRENGTH = 0.016;
 const GRAVITY_SPIN = 0.12;
 const NOISE_STRENGTH = 0.48;
@@ -115,7 +115,7 @@ export class Layer06 extends ThreeSketch {
                 allVerts = allVerts.concat(extractVertices(geo));
 
                 // "50" visual — black, hidden by default, shown on red flash
-                const label = new ThreeMesh(geo, new MeshBasicMaterial({ color: BLACK, side: DoubleSide, transparent: true, opacity: 0.2 }));
+                const label = new ThreeMesh(geo, new MeshBasicMaterial({ color: BLACK, side: DoubleSide, transparent: true, opacity: 0 }));
                 label.visible = false;
                 label.renderOrder = 1;
                 this.scene.add(label);
