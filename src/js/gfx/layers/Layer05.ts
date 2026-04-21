@@ -1,14 +1,14 @@
 import { ThreeDOMLayer } from "@fils/gl-dom";
 import { gsap } from "gsap";
 import { MeshBasicMaterial } from "three";
-import { Layer04 } from "./Layer04";
+import { PhysicsLayer } from "./PhysicsLayer";
 import { WHITE } from "../palette";
 import { MASTER_BPM, tempo } from "../FlashLayer";
 
 const SLOW_RATIO = 1 / 3;
 const FLASH_DURATION = 0.18;
 
-export class Layer05 extends Layer04 {
+export class Layer05 extends PhysicsLayer {
     private slowPhase = 0;
     private slowBeat = -1;
     private flashTimer = 0;
