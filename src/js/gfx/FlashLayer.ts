@@ -4,7 +4,7 @@ import { ThreeSketch } from "./ThreeSketch";
 import { BLACK, WHITE, RED } from "./palette";
 
 export const W = 1920, H = 1080;
-export const MASTER_BPM = 60;
+export const MASTER_BPM = 75;
 export const DEFAULT_BPM = MASTER_BPM;
 export const tempo = { bpm: MASTER_BPM };
 

@@ -1,10 +1,11 @@
 import { ThreeDOMLayer } from "@fils/gl-dom";
-import { MulticolorFil, FilThreePalette } from "@fil-studio/identity-blocks";
 import {
-    Color, OrthographicCamera, Box3, Vector3, Matrix4,
+    OrthographicCamera, Box3, Vector3, Matrix4,
     DoubleSide, Group, BufferGeometry, Vector2,
     Mesh as ThreeMesh, MeshBasicMaterial
 } from "three";
+import { Line2 } from "three/examples/jsm/lines/Line2.js";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createNoise3D } from "simplex-noise";
@@ -15,8 +16,8 @@ import { W, H, tempo } from "../FlashLayer";
 const HW = W / 2, HH = H / 2;
 const TARGET_HEIGHT = 600;
 const N_THREADS = 1000;
-const N_SEGMENTS = 50;
-const SPRING_REST = 0.25;
+const N_SEGMENTS = 24;
+const SPRING_REST = 0.3;
 const THREAD_SCALE = 7;
 const GRAVITY_STRENGTH = 0.016;
 const GRAVITY_SPIN = 0.12;
@@ -26,14 +27,8 @@ const NOISE_SCALE = 0.12;
 const NOISE_SPEED = 0.6;
 const SLOW_RATIO = 0.3;
 const FLASH_DURATION = 0.25;
-
-const BLACK_PALETTE: FilThreePalette = [
-    new Color(0x000000),
-    new Color(0x0d0d0d),
-    new Color(0x1a1a1a),
-    new Color(0x080808),
-    new Color(0x111111),
-];
+const DAMPING = 0.975;
+const CONSTRAINT_ITERS = 3;
 
 function extractVertices(geo: BufferGeometry): Vector2[] {
     const pos = geo.getAttribute('position');
@@ -61,7 +56,6 @@ function shuffle<T>(arr: T[]): T[] {
 
 export class Layer06 extends ThreeSketch {
     private ortho: OrthographicCamera;
-    private fils: MulticolorFil[] = [];
     private group: Group = new Group();
     private prevTime = 0;
     private noiseX = createNoise3D();
@@ -69,9 +63,19 @@ export class Layer06 extends ThreeSketch {
     private slowPhase = 0;
     private slowBeat = -1;
     private flashTimer = 0;
-    private wasFlashing = false;
-    private anchors: { x: number, y: number }[] = [];
     private labelMeshes: any[] = [];
+
+    // Physics — pre-allocated per-thread Float32Arrays, zero GC in hot path
+    private nThreads = 0;
+    private curPos: Float32Array[] = [];
+    private prevPos: Float32Array[] = [];
+    private anchorX: number[] = [];
+    private anchorY: number[] = [];
+
+    // Rendering — direct references to Line2 interleaved buffers, updated in-place
+    // LineGeometry stores segment pairs as [(p0,p1), (p1,p2), ...], (N_SEGMENTS-1)*6 floats
+    private lineBuffers: Float32Array[] = [];
+    private lineIBufs: any[] = [];
 
     constructor(_gl: ThreeDOMLayer) {
         super(_gl);
@@ -80,23 +84,21 @@ export class Layer06 extends ThreeSketch {
         this.gl.renderer.setClearColor(WHITE, 1);
         this.scene.add(this.group);
         this.group.scale.setScalar(THREAD_SCALE);
-
         this.loadThreads();
     }
 
     private loadThreads() {
-        const mat = new LineMaterial({ linewidth: 2, vertexColors: true });
+        const mat = new LineMaterial({ linewidth: 2, color: 0x000000 });
         mat.resolution.set(W, H);
 
         const loader = new GLTFLoader();
-        loader.load('/assets/models/50.glb', (gltf) => {
+        loader.load('/assets/models/50-02.glb', (gltf) => {
             const meshObjects: any[] = [];
             gltf.scene.updateWorldMatrix(true, true);
             gltf.scene.traverse(child => {
                 if ((child as any).isMesh) meshObjects.push(child);
             });
 
-            // Bake to pixel space (same as Layer04)
             const bbox = new Box3();
             meshObjects.forEach(m => bbox.expandByObject(m));
             const size = new Vector3(), center = new Vector3();
@@ -106,7 +108,6 @@ export class Layer06 extends ThreeSketch {
                 .makeScale(scale, scale, scale)
                 .setPosition(-center.x * scale, -center.y * scale, 0);
 
-            // Collect all unique vertices in pixel space
             let allVerts: Vector2[] = [];
             for (const meshObj of meshObjects) {
                 const geo = meshObj.geometry.clone();
@@ -114,48 +115,60 @@ export class Layer06 extends ThreeSketch {
                 geo.applyMatrix4(pixelMatrix);
                 allVerts = allVerts.concat(extractVertices(geo));
 
-                // "50" visual — black, hidden by default, shown on red flash
-                const label = new ThreeMesh(geo, new MeshBasicMaterial({ color: BLACK, side: DoubleSide, transparent: true, opacity: 0 }));
+                const label = new ThreeMesh(geo, new MeshBasicMaterial({ color: BLACK, side: DoubleSide }));
                 label.visible = false;
                 label.renderOrder = 1;
                 this.scene.add(label);
                 this.labelMeshes.push(label);
             }
 
-            // Pick N_THREADS random vertices
             shuffle(allVerts);
             const chosen = allVerts.slice(0, Math.min(N_THREADS, allVerts.length));
+            console.log(`[Layer06] total unique verts: ${allVerts.length}, threads spawned: ${chosen.length}`);
+            this.nThreads = chosen.length;
 
-            for (const v of chosen) {
-                // Physics positions are in pixel/THREAD_SCALE units
-                const phyX = v.x / THREAD_SCALE;
-                const phyY = v.y / THREAD_SCALE;
+            for (let ti = 0; ti < this.nThreads; ti++) {
+                const v = chosen[ti];
+                const ax = v.x / THREAD_SCALE;
+                const ay = v.y / THREAD_SCALE;
+                this.anchorX.push(ax);
+                this.anchorY.push(ay);
 
-                const positions: number[] = [];
+                const cur = new Float32Array(N_SEGMENTS * 3);
+                const prev = new Float32Array(N_SEGMENTS * 3);
                 for (let i = 0; i < N_SEGMENTS; i++) {
-                    positions.push(phyX, phyY - i * SPRING_REST, 0);
+                    cur[i*3]     = ax;
+                    cur[i*3 + 1] = ay - i * SPRING_REST;
+                    prev[i*3]     = ax;
+                    prev[i*3 + 1] = ay - i * SPRING_REST;
                 }
+                this.curPos.push(cur);
+                this.prevPos.push(prev);
 
-                const fil = new MulticolorFil({
-                    customPositions: positions,
-                    addGravity: false,
-                    palette: BLACK_PALETTE,
-                    materialInstance: mat,
-                });
+                // Build flat point list for initial LineGeometry.setPositions
+                const pts: number[] = [];
+                for (let i = 0; i < N_SEGMENTS; i++) pts.push(ax, ay - i * SPRING_REST, 0);
 
-                fil.particles[0].lock();
-                this.anchors.push({ x: phyX, y: phyY });
-                this.group.add(fil.fil);
-                this.fils.push(fil);
+                const lgeo = new LineGeometry();
+                lgeo.setPositions(pts);
+
+                // Grab the backing InstancedInterleavedBuffer directly so we never
+                // call setPositions() or computeLineDistances() again (both allocate)
+                const attr = lgeo.getAttribute('instanceStart') as any;
+                this.lineIBufs.push(attr.data);
+                this.lineBuffers.push(attr.data.array as Float32Array);
+
+                this.group.add(new Line2(lgeo, mat));
             }
         });
     }
 
     update(time: number) {
+        if (this.nThreads === 0) return;
+
         const dt = Math.min(time - this.prevTime, 0.05);
         this.prevTime = time;
 
-        // Slow beat
         this.slowPhase += (tempo.bpm * SLOW_RATIO / 60) * dt;
         const newSlowBeat = Math.floor(this.slowPhase);
         if (newSlowBeat !== this.slowBeat) {
@@ -166,43 +179,64 @@ export class Layer06 extends ThreeSketch {
         const flashing = this.flashTimer > 0;
         this.flashTimer = Math.max(0, this.flashTimer - dt);
 
-        // Flash start — unlock anchors
-        if (flashing && !this.wasFlashing) {
-            for (const fil of this.fils) fil.particles[0].unlock();
-        }
-
-        // Flash end — snap anchors back and re-lock
-        if (!flashing && this.wasFlashing) {
-            for (let i = 0; i < this.fils.length; i++) {
-                const p = this.fils[i].particles[0];
-                p.setPosition(this.anchors[i].x, this.anchors[i].y, 0);
-                p.lock();
-            }
-        }
-
-        this.wasFlashing = flashing;
-
         this.gl.renderer.setClearColor(flashing ? RED : WHITE, 1);
-        for (const m of this.labelMeshes) m.visible = flashing;
 
         const strength = NOISE_STRENGTH * (flashing ? NOISE_BOOST : 1);
         const t = time * NOISE_SPEED;
         const gravAngle = time * GRAVITY_SPIN;
         const gx = Math.cos(gravAngle) * GRAVITY_STRENGTH;
         const gy = Math.sin(gravAngle) * GRAVITY_STRENGTH;
+        const nT = this.nThreads;
 
-        for (const fil of this.fils) {
-            const particles = fil.particles;
-            // include particle[0] when unlocked so it also gets pushed around
-            const start = flashing ? 0 : 1;
-            for (let i = start; i < particles.length; i++) {
-                const p = particles[i];
-                const nx = p.position.x * NOISE_SCALE;
-                const ny = p.position.y * NOISE_SCALE;
-                p.force.x += gx + this.noiseX(nx, ny, t) * strength;
-                p.force.y += gy + this.noiseY(nx + 31.7, ny + 17.3, t) * strength;
+        for (let ti = 0; ti < nT; ti++) {
+            const cur = this.curPos[ti];
+            const prev = this.prevPos[ti];
+            const ax = this.anchorX[ti];
+            const ay = this.anchorY[ti];
+
+            // Verlet integrate — particle 0 stays pinned.
+            // Forces are per-frame impulses (tuned constants), not physical accelerations,
+            // so they are added directly without dt scaling.
+            for (let i = 1; i < N_SEGMENTS; i++) {
+                const k = i * 3;
+                const px = cur[k],     ox = prev[k];
+                const py = cur[k + 1], oy = prev[k + 1];
+                const fx = gx + this.noiseX(px * NOISE_SCALE, py * NOISE_SCALE, t) * strength;
+                const fy = gy + this.noiseY(px * NOISE_SCALE + 31.7, py * NOISE_SCALE + 17.3, t) * strength;
+                prev[k]     = px;
+                prev[k + 1] = py;
+                cur[k]     = px + (px - ox) * DAMPING + fx;
+                cur[k + 1] = py + (py - oy) * DAMPING + fy;
             }
-            fil.update(dt);
+
+            // Spring constraint relaxation — re-pin anchor after each pass
+            for (let iter = 0; iter < CONSTRAINT_ITERS; iter++) {
+                for (let i = 0; i < N_SEGMENTS - 1; i++) {
+                    const a = i * 3, b = (i + 1) * 3;
+                    const dx = cur[b]     - cur[a];
+                    const dy = cur[b + 1] - cur[a + 1];
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 1e-6) continue;
+                    const diff = (dist - SPRING_REST) / dist * 0.5;
+                    const cx = dx * diff, cy = dy * diff;
+                    if (i > 0) { cur[a] += cx; cur[a + 1] += cy; }
+                    cur[b]     -= cx;
+                    cur[b + 1] -= cy;
+                }
+                cur[0] = ax; cur[1] = ay;
+            }
+
+            // Write physics positions into the Line2 interleaved buffer in-place.
+            // Format: [(p0.x,p0.y,p0.z, p1.x,p1.y,p1.z), (p1.x,...), ...] — (N_SEGMENTS-1)*6 floats
+            const buf = this.lineBuffers[ti];
+            for (let i = 0; i < N_SEGMENTS - 1; i++) {
+                const s = i * 3, d = i * 6;
+                buf[d]     = cur[s];
+                buf[d + 1] = cur[s + 1];
+                buf[d + 3] = cur[s + 3];   // (i+1)*3
+                buf[d + 4] = cur[s + 4];   // (i+1)*3+1
+            }
+            this.lineIBufs[ti].needsUpdate = true;
         }
     }
 }
