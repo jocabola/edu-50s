@@ -43,7 +43,7 @@ export class App {
 		];
 
 		for (const layer of this.layers) layer.active = false;
-		this.activeIndex = 6;
+		this.activeIndex = 4;
 
 		window.addEventListener('keydown', (e) => {
 			const n = parseInt(e.key);
