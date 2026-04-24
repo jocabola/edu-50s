@@ -92,7 +92,7 @@ export class Layer06 extends ThreeSketch {
         mat.resolution.set(W, H);
 
         const loader = new GLTFLoader();
-        loader.load('/assets/models/50-02.glb', (gltf) => {
+        loader.load('./assets/models/50-02.glb', (gltf) => {
             const meshObjects: any[] = [];
             gltf.scene.updateWorldMatrix(true, true);
             gltf.scene.traverse(child => {

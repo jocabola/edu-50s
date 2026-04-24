@@ -106,7 +106,7 @@ export class PhysicsLayer extends FlashLayer {
 
     protected loadLabel() {
         const loader = new GLTFLoader();
-        loader.load('/assets/models/50.glb', (gltf) => {
+        loader.load('./assets/models/50.glb', (gltf) => {
             const meshObjects: Mesh[] = [];
             gltf.scene.updateWorldMatrix(true, true);
             gltf.scene.traverse(child => {

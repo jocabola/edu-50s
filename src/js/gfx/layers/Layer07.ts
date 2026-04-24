@@ -140,7 +140,7 @@ export class Layer07 extends FlashLayer {
     }
 
     private loadMesh() {
-        new GLTFLoader().load('/assets/models/50.glb', (gltf) => {
+        new GLTFLoader().load('./assets/models/50.glb', (gltf) => {
             const meshObjects: Mesh[] = [];
             gltf.scene.updateWorldMatrix(true, true);
             gltf.scene.traverse(c => { if ((c as Mesh).isMesh) meshObjects.push(c as Mesh); });

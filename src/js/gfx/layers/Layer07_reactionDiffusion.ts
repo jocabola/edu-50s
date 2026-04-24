@@ -134,7 +134,7 @@ export class Layer07 extends ThreeSketch {
         const renderer = this.gl.renderer;
 
         const loader = new GLTFLoader();
-        loader.load('/assets/models/50.glb', (gltf) => {
+        loader.load('./assets/models/50.glb', (gltf) => {
             const meshObjects: any[] = [];
             gltf.scene.updateWorldMatrix(true, true);
             gltf.scene.traverse(c => { if ((c as any).isMesh) meshObjects.push(c); });

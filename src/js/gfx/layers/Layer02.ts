@@ -13,7 +13,7 @@ export class Layer02 extends FlashLayer {
 
         this.label = new Text();
         this.label.text = "50";
-        this.label.font = "/assets/fonts/font.woff";
+        this.label.font = "./assets/fonts/font.woff";
         this.label.fontSize = FONT_SIZE;
         this.label.letterSpacing = -0.2;
         this.label.anchorX = "center";

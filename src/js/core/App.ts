@@ -7,6 +7,7 @@ import { Layer04 } from "../gfx/layers/Layer04";
 import { Layer05 } from "../gfx/layers/Layer05";
 import { Layer06 } from "../gfx/layers/Layer06";
 import { Layer07 } from "../gfx/layers/Layer07";
+import { Layer08 } from "../gfx/layers/Layer08";
 import { Timer } from "@fils/ani";
 import { tempo, MASTER_BPM } from "../gfx/FlashLayer";
 
@@ -35,15 +36,16 @@ export class App {
 		this.layers = [
 			new Layer01(this.gl),
 			new Layer02(this.gl),
-			new Layer03(this.gl),
 			new Layer04(this.gl),
+			new Layer03(this.gl),
 			new Layer05(this.gl),
 			new Layer06(this.gl),
 			new Layer07(this.gl),
+			new Layer08(this.gl),
 		];
 
 		for (const layer of this.layers) layer.active = false;
-		this.activeIndex = 4;
+		this.activeIndex = 0;
 
 		window.addEventListener('keydown', (e) => {
 			const n = parseInt(e.key);
