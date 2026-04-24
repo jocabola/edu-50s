@@ -22,7 +22,7 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, '../public/index.html'))
   } */
- win.loadFile(path.join(__dirname, '../public/index.html'));
+ win.loadFile(path.join(__dirname, 'public/index.html'));
 }
 
 app.whenReady().then(createWindow)
